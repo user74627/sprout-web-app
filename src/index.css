@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    @apply bg-cream-100 text-gray-800 font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  input, textarea {
+    @apply outline-none;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-3xl shadow-card border border-gray-100/60 p-5;
+  }
+  .btn {
+    @apply font-semibold py-3 px-6 rounded-2xl transition-all duration-150 active:scale-95 cursor-pointer select-none;
+  }
+  .btn-primary {
+    @apply btn bg-sprout-500 hover:bg-sprout-600 text-white shadow-sm;
+  }
+  .btn-secondary {
+    @apply btn bg-gray-100 hover:bg-gray-200 text-gray-700;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent hover:bg-gray-100 text-gray-600;
+  }
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+  .badge-easy {
+    @apply badge bg-blue-100 text-blue-700;
+  }
+  .badge-medium {
+    @apply badge bg-amber-100 text-amber-700;
+  }
+  .badge-hard {
+    @apply badge bg-rose-100 text-rose-700;
+  }
+  .page {
+    @apply min-h-screen pb-24 px-4 pt-6;
+  }
+}
+
+/* Scrollbar hide utility */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
