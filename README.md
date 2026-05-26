@@ -16,6 +16,18 @@ npm run dev
 
 ## Deploy
 
-This repo is configured with GitHub Pages via a workflow in `.github/workflows/deploy.yml`.
-The app is built for GitHub Pages using a `BASE_URL` during the build.
+Live site: https://user74627.github.io/sprout-web-app/
+
+This repo deploys to GitHub Pages via `.github/workflows/deploy.yml` on every push to `main`.
+
+For Firebase login to work in production, add these **Repository secrets** (Settings → Secrets and variables → Actions), matching `.env.example`:
+
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
+
+In Firebase Console, add `user74627.github.io` to **Authorized domains** (Authentication → Settings).
 
