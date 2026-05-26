@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from '../firebase/config'
+import { isDemoMode } from '../lib/isDemoMode'
+import { DEMO_USER } from '../demo/demoUser'
 
 const AuthContext = createContext(null)
 
@@ -9,15 +9,38 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser)
+    if (isDemoMode) {
+      const loggedOut = sessionStorage.getItem('sprout-demo-logged-out') === '1'
+      setUser(loggedOut ? null : DEMO_USER)
       setLoading(false)
-    })
-    return unsubscribe
+      return
+    }
+
+    let unsubscribe
+    ;(async () => {
+      const { onAuthStateChanged } = await import('firebase/auth')
+      const { auth } = await import('../firebase/config')
+      unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+        setUser(firebaseUser)
+        setLoading(false)
+      })
+    })()
+
+    return () => unsubscribe?.()
   }, [])
 
+  const enterDemo = () => {
+    sessionStorage.removeItem('sprout-demo-logged-out')
+    setUser(DEMO_USER)
+  }
+
+  const leaveDemo = () => {
+    sessionStorage.setItem('sprout-demo-logged-out', '1')
+    setUser(null)
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, isDemoMode, enterDemo, leaveDemo }}>
       {children}
     </AuthContext.Provider>
   )

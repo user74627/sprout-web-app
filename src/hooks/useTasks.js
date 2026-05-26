@@ -1,12 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
-import { onSnapshot, query, orderBy } from 'firebase/firestore'
 import { useAuth } from '../contexts/AuthContext'
-import {
-  tasksRef,
-  addTask as dbAddTask,
-  completeTask as dbCompleteTask,
-  deleteTask as dbDeleteTask,
-} from '../firebase/db'
+import { isDemoMode } from '../lib/isDemoMode'
+import * as demo from '../demo/demoStore'
 
 export function useTasks() {
   const { user } = useAuth()
@@ -15,20 +10,42 @@ export function useTasks() {
   const [lastReward, setLastReward] = useState(null)
 
   useEffect(() => {
-    if (!user) return
-
-    const q = query(tasksRef(user.uid), orderBy('createdAt', 'desc'))
-    const unsubscribe = onSnapshot(q, (snap) => {
-      setTasks(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+    if (!user) {
+      setTasks([])
       setLoading(false)
-    })
+      return
+    }
 
-    return unsubscribe
+    if (isDemoMode) {
+      const refresh = () => setTasks(demo.getTasks())
+      refresh()
+      setLoading(false)
+      return demo.subscribe(refresh)
+    }
+
+    let unsubscribe
+    ;(async () => {
+      const { onSnapshot, query, orderBy } = await import('firebase/firestore')
+      const { tasksRef } = await import('../firebase/db')
+
+      const q = query(tasksRef(user.uid), orderBy('createdAt', 'desc'))
+      unsubscribe = onSnapshot(q, (snap) => {
+        setTasks(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+        setLoading(false)
+      })
+    })()
+
+    return () => unsubscribe?.()
   }, [user])
 
   const addTask = useCallback(
     async (title, difficulty = 'medium') => {
       if (!user) return
+      if (isDemoMode) {
+        demo.addTask(title, difficulty)
+        return
+      }
+      const { addTask: dbAddTask } = await import('../firebase/db')
       await dbAddTask(user.uid, title, difficulty)
     },
     [user],
@@ -37,7 +54,12 @@ export function useTasks() {
   const completeTask = useCallback(
     async (taskId, difficulty) => {
       if (!user) return
-      const reward = await dbCompleteTask(user.uid, taskId, difficulty)
+      const reward = isDemoMode
+        ? demo.completeTask(taskId, difficulty)
+        : await (async () => {
+            const { completeTask: dbCompleteTask } = await import('../firebase/db')
+            return dbCompleteTask(user.uid, taskId, difficulty)
+          })()
       setLastReward(reward)
       setTimeout(() => setLastReward(null), 2500)
     },
@@ -47,6 +69,11 @@ export function useTasks() {
   const deleteTask = useCallback(
     async (taskId) => {
       if (!user) return
+      if (isDemoMode) {
+        demo.deleteTask(taskId)
+        return
+      }
+      const { deleteTask: dbDeleteTask } = await import('../firebase/db')
       await dbDeleteTask(user.uid, taskId)
     },
     [user],

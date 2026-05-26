@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { usePet, getPetState } from '../hooks/usePet'
 import { useAuth } from '../contexts/AuthContext'
-import { signOutUser } from '../firebase/auth'
+import { isDemoMode } from '../lib/isDemoMode'
+import { resetDemoData } from '../demo/demoStore'
 import Pet from '../components/Pet/Pet'
 
 const STATE_LABEL = {
@@ -13,7 +14,7 @@ const STATE_LABEL = {
 }
 
 export default function Profile() {
-  const { user } = useAuth()
+  const { user, leaveDemo } = useAuth()
   const { petData, loading, updatePetName } = usePet()
   const [editingName, setEditingName] = useState(false)
   const [petNameInput, setPetNameInput] = useState('')
@@ -28,7 +29,21 @@ export default function Profile() {
 
   async function handleSignOut() {
     setSigningOut(true)
-    try { await signOutUser() } finally { setSigningOut(false) }
+    try {
+      if (isDemoMode) {
+        leaveDemo()
+      } else {
+        const { signOutUser } = await import('../firebase/auth')
+        await signOutUser()
+      }
+    } finally {
+      setSigningOut(false)
+    }
+  }
+
+  function handleResetDemo() {
+    resetDemoData()
+    window.location.reload()
   }
 
   async function savePetName() {
@@ -145,13 +160,31 @@ export default function Profile() {
         </div>
       </motion.div>
 
-      {/* Sign out */}
+      {isDemoMode && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12 }}
+          className="mb-3"
+        >
+          <button
+            type="button"
+            onClick={handleResetDemo}
+            className="w-full card flex items-center justify-center gap-2 text-amber-700
+                       hover:bg-amber-50 active:scale-[0.98] transition-all font-semibold"
+          >
+            ↺ Reset demo data
+          </button>
+        </motion.div>
+      )}
+
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
       >
         <button
+          type="button"
           onClick={handleSignOut}
           disabled={signingOut}
           className="w-full card flex items-center justify-center gap-2 text-rose-500
@@ -159,8 +192,7 @@ export default function Profile() {
         >
           {signingOut
             ? <span className="w-5 h-5 border-2 border-rose-400 border-t-transparent rounded-full animate-spin" />
-            : '↩ Sign Out'
-          }
+            : isDemoMode ? '↩ Exit demo' : '↩ Sign Out'}
         </button>
       </motion.div>
     </div>

@@ -1,8 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
-import { doc, onSnapshot, updateDoc, serverTimestamp } from 'firebase/firestore'
-import { db } from '../firebase/config'
-import { initUserDoc, applyHealthDecay, equipItem as dbEquipItem } from '../firebase/db'
 import { useAuth } from '../contexts/AuthContext'
+import { isDemoMode } from '../lib/isDemoMode'
+import * as demo from '../demo/demoStore'
 
 export function getPetState(health) {
   if (health >= 75) return 'thriving'
@@ -15,48 +14,70 @@ export function usePet() {
   const { user } = useAuth()
   const [petData, setPetData] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [decayApplied, setDecayApplied] = useState(false)
 
   useEffect(() => {
-    if (!user) return
-
-    const userRef = doc(db, 'users', user.uid)
-
-    const unsubscribe = onSnapshot(userRef, async (snap) => {
-      if (!snap.exists()) {
-        await initUserDoc(user.uid, user.displayName)
-        return
-      }
-
-      const data = snap.data()
-
-      // Apply health decay once per session (avoid re-triggering on own writes)
-      if (!decayApplied) {
-        const lastMs = data.lastUpdated?.toMillis?.() ?? Date.now()
-        const hoursSince = (Date.now() - lastMs) / 3_600_000
-        const decay = Math.floor(hoursSince * 3)
-        if (decay > 0) {
-          setDecayApplied(true)
-          const newHealth = Math.max(0, (data.petHealth ?? 100) - decay)
-          await updateDoc(userRef, {
-            petHealth: newHealth,
-            lastUpdated: serverTimestamp(),
-          })
-          return // onSnapshot fires again with fresh data
-        }
-      }
-
-      setPetData(data)
+    if (!user) {
+      setPetData(null)
       setLoading(false)
-    })
+      return
+    }
 
-    return unsubscribe
-  }, [user, decayApplied])
+    if (isDemoMode) {
+      const refresh = () => setPetData(demo.getUserDoc())
+      refresh()
+      setLoading(false)
+      return demo.subscribe(refresh)
+    }
+
+    let unsubscribe
+    ;(async () => {
+      const { doc, onSnapshot, updateDoc, serverTimestamp } = await import('firebase/firestore')
+      const { db } = await import('../firebase/config')
+      const { initUserDoc } = await import('../firebase/db')
+
+      let decayApplied = false
+      const userRef = doc(db, 'users', user.uid)
+
+      unsubscribe = onSnapshot(userRef, async (snap) => {
+        if (!snap.exists()) {
+          await initUserDoc(user.uid, user.displayName)
+          return
+        }
+
+        const data = snap.data()
+
+        if (!decayApplied) {
+          const lastMs = data.lastUpdated?.toMillis?.() ?? Date.now()
+          const hoursSince = (Date.now() - lastMs) / 3_600_000
+          const decay = Math.floor(hoursSince * 3)
+          if (decay > 0) {
+            decayApplied = true
+            const newHealth = Math.max(0, (data.petHealth ?? 100) - decay)
+            await updateDoc(userRef, {
+              petHealth: newHealth,
+              lastUpdated: serverTimestamp(),
+            })
+            return
+          }
+        }
+
+        setPetData(data)
+        setLoading(false)
+      })
+    })()
+
+    return () => unsubscribe?.()
+  }, [user])
 
   const toggleEquip = useCallback(
     async (itemId) => {
       if (!user || !petData) return
-      await dbEquipItem(user.uid, itemId, petData.equippedItems ?? [])
+      if (isDemoMode) {
+        demo.equipItem(itemId, petData.equippedItems ?? [])
+        return
+      }
+      const { equipItem } = await import('../firebase/db')
+      await equipItem(user.uid, itemId, petData.equippedItems ?? [])
     },
     [user, petData],
   )
@@ -64,6 +85,12 @@ export function usePet() {
   const updatePetName = useCallback(
     async (name) => {
       if (!user) return
+      if (isDemoMode) {
+        demo.updateUserDoc({ petName: name })
+        return
+      }
+      const { doc, updateDoc } = await import('firebase/firestore')
+      const { db } = await import('../firebase/config')
       await updateDoc(doc(db, 'users', user.uid), { petName: name })
     },
     [user],

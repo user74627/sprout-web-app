@@ -6,6 +6,7 @@ import TaskList from './pages/TaskList'
 import Shop from './pages/Shop'
 import Profile from './pages/Profile'
 import Navbar from './components/Navbar/Navbar'
+import DemoBanner from './components/DemoBanner/DemoBanner'
 
 function Spinner() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
   return (
     <HashRouter>
       <div className="max-w-md mx-auto min-h-screen relative">
+        <DemoBanner />
         <Routes>
           <Route
             path="/auth"

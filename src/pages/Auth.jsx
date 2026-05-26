@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { signUpWithEmail, signInWithEmail } from '../firebase/auth'
+import { useAuth } from '../contexts/AuthContext'
+import { isDemoMode } from '../lib/isDemoMode'
 
 export default function Auth() {
-  const [mode, setMode] = useState('login') // 'login' | 'signup'
+  const { enterDemo } = useAuth()
+  const [mode, setMode] = useState('login')
   const [form, setForm] = useState({ name: '', email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -22,6 +24,7 @@ export default function Auth() {
 
     setLoading(true)
     try {
+      const { signUpWithEmail, signInWithEmail } = await import('../firebase/auth')
       if (mode === 'signup') {
         await signUpWithEmail(form.email.trim(), form.password, form.name.trim())
       } else {
@@ -41,9 +44,45 @@ export default function Auth() {
     }
   }
 
+  if (isDemoMode) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-sprout-50 to-cream-100 flex flex-col items-center justify-center px-6 py-12">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col items-center mb-10"
+        >
+          <div className="w-20 h-20 bg-sprout-500 rounded-3xl flex items-center justify-center mb-4 shadow-soft">
+            <span className="text-4xl">🌱</span>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900">Sprout</h1>
+          <p className="text-gray-500 mt-1 text-center text-sm max-w-xs">
+            Try the demo — no sign-up, no Firebase. Your pet and tasks are saved in this browser.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full card shadow-soft text-center"
+        >
+          <p className="text-sm text-gray-600 mb-6">
+            Sample tasks and coins are already loaded so you can explore the shop and complete tasks right away.
+          </p>
+          <button
+            type="button"
+            onClick={enterDemo}
+            className="btn-primary w-full text-lg py-4"
+          >
+            Start Demo
+          </button>
+        </motion.div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-sprout-50 to-cream-100 flex flex-col items-center justify-center px-6 py-12">
-      {/* Logo */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -58,18 +97,17 @@ export default function Auth() {
         </p>
       </motion.div>
 
-      {/* Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
         className="w-full card shadow-soft"
       >
-        {/* Toggle */}
         <div className="flex bg-gray-100 rounded-2xl p-1 mb-6">
           {['login', 'signup'].map((m) => (
             <button
               key={m}
+              type="button"
               onClick={() => { setMode(m); setError('') }}
               className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
                 mode === m ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
