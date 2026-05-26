@@ -10,8 +10,8 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (isDemoMode) {
-      const loggedOut = sessionStorage.getItem('sprout-demo-logged-out') === '1'
-      setUser(loggedOut ? null : DEMO_USER)
+      // Always in for the public demo link — data stays in this browser's localStorage
+      setUser(DEMO_USER)
       setLoading(false)
       return
     }
@@ -29,15 +29,9 @@ export function AuthProvider({ children }) {
     return () => unsubscribe?.()
   }, [])
 
-  const enterDemo = () => {
-    sessionStorage.removeItem('sprout-demo-logged-out')
-    setUser(DEMO_USER)
-  }
+  const enterDemo = () => setUser(DEMO_USER)
 
-  const leaveDemo = () => {
-    sessionStorage.setItem('sprout-demo-logged-out', '1')
-    setUser(null)
-  }
+  const leaveDemo = () => setUser(null)
 
   return (
     <AuthContext.Provider value={{ user, loading, isDemoMode, enterDemo, leaveDemo }}>
