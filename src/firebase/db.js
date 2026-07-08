@@ -10,6 +10,9 @@ import {
   runTransaction,
 } from 'firebase/firestore'
 import { db } from './config'
+import { getTaskReward } from '../core/rewards'
+import { applyHealthReward, getPetLevel } from '../core/pet'
+import { toggleEquippedItem } from '../core/shop'
 
 // ── User document ────────────────────────────────────────────────────────────
 
@@ -21,9 +24,14 @@ export async function initUserDoc(uid, displayName) {
       displayName: displayName || 'Sprout User',
       petName: 'Pip',
       petHealth: 100,
+      xp: 0,
+      level: 1,
       coins: 0,
+      coinsSpent: 0,
       totalCoinsEarned: 0,
       tasksCompleted: 0,
+      currentStreak: 0,
+      bestStreak: 0,
       equippedItems: [],
       lastUpdated: serverTimestamp(),
       createdAt: serverTimestamp(),
@@ -53,12 +61,6 @@ export async function applyHealthDecay(uid, petHealth, lastUpdatedMs) {
 
 // ── Tasks ────────────────────────────────────────────────────────────────────
 
-const TASK_REWARDS = {
-  easy:   { health: 10, coins: 5  },
-  medium: { health: 20, coins: 15 },
-  hard:   { health: 35, coins: 30 },
-}
-
 export function tasksRef(uid) {
   return collection(db, 'users', uid, 'tasks')
 }
@@ -73,20 +75,27 @@ export async function addTask(uid, title, difficulty) {
 }
 
 export async function completeTask(uid, taskId, difficulty) {
-  const reward = TASK_REWARDS[difficulty] || TASK_REWARDS.medium
+  const reward = getTaskReward(difficulty)
   const userRef = doc(db, 'users', uid)
   const taskRef = doc(db, 'users', uid, 'tasks', taskId)
 
   await runTransaction(db, async (tx) => {
     const userSnap = await tx.get(userRef)
+    const taskSnap = await tx.get(taskRef)
     const data = userSnap.data()
-    const newHealth = Math.min(100, (data.petHealth || 0) + reward.health)
+    const task = taskSnap.data()
+    if (!task || task.completed) return
+
+    const xp = (data.xp || 0) + reward.xp
+    const newHealth = applyHealthReward(data.petHealth || 0, reward.health)
 
     tx.update(taskRef, { completed: true, completedAt: serverTimestamp() })
     tx.update(userRef, {
       petHealth: newHealth,
       coins: (data.coins || 0) + reward.coins,
       totalCoinsEarned: (data.totalCoinsEarned || 0) + reward.coins,
+      xp,
+      level: getPetLevel(xp),
       tasksCompleted: (data.tasksCompleted || 0) + 1,
       lastUpdated: serverTimestamp(),
     })
@@ -111,18 +120,23 @@ export async function purchaseItem(uid, item) {
 
   await runTransaction(db, async (tx) => {
     const userSnap = await tx.get(userRef)
-    const coins = userSnap.data()?.coins || 0
+    const itemSnap = await tx.get(itemRef)
+    if (itemSnap.exists()) throw new Error('Already owned')
+
+    const userData = userSnap.data() || {}
+    const coins = userData.coins || 0
     if (coins < item.price) throw new Error('Not enough coins')
 
     tx.set(itemRef, { name: item.name, purchasedAt: serverTimestamp() })
-    tx.update(userRef, { coins: coins - item.price })
+    tx.update(userRef, {
+      coins: coins - item.price,
+      coinsSpent: (userData.coinsSpent || 0) + item.price,
+    })
   })
 }
 
 export async function equipItem(uid, itemId, equippedItems) {
   await updateDoc(doc(db, 'users', uid), {
-    equippedItems: equippedItems.includes(itemId)
-      ? equippedItems.filter((i) => i !== itemId)
-      : [...equippedItems, itemId],
+    equippedItems: toggleEquippedItem(equippedItems, itemId),
   })
 }

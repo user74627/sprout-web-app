@@ -1,4 +1,6 @@
-import { TASK_REWARDS } from '../constants/shopItems'
+import { applyHealthDecay, getPetLevel } from '../core/pet'
+import { completeTaskState } from '../core/tasks'
+import { purchaseItemState, toggleEquippedItem } from '../core/shop'
 
 const STORAGE_KEY = 'sprout-demo-v1'
 
@@ -23,9 +25,14 @@ function defaultState() {
       displayName: 'Demo User',
       petName: 'Pip',
       petHealth: 68,
+      xp: 135,
+      level: 2,
       coins: 85,
+      coinsSpent: 35,
       totalCoinsEarned: 120,
       tasksCompleted: 4,
+      currentStreak: 2,
+      bestStreak: 3,
       equippedItems: [],
       lastUpdated: hourAgo,
       createdAt: now - 7 * 86_400_000,
@@ -89,21 +96,9 @@ export function resetDemoData() {
   saveRaw(defaultState())
 }
 
-function applyDecay(user) {
-  const lastMs = user.lastUpdated ?? Date.now()
-  const hoursSince = (Date.now() - lastMs) / 3_600_000
-  const decay = Math.floor(hoursSince * 3)
-  if (decay <= 0) return user
-  return {
-    ...user,
-    petHealth: Math.max(0, (user.petHealth ?? 100) - decay),
-    lastUpdated: Date.now(),
-  }
-}
-
 export function getUserDoc() {
   const state = loadRaw()
-  const user = applyDecay(state.user)
+  const { user } = applyHealthDecay(state.user)
   if (user.lastUpdated !== state.user.lastUpdated) {
     state.user = user
     saveRaw(state)
@@ -145,21 +140,21 @@ export function addTask(title, difficulty) {
 }
 
 export function completeTask(taskId, difficulty) {
-  const reward = TASK_REWARDS[difficulty] || TASK_REWARDS.medium
   const state = loadRaw()
   const task = state.tasks.find((t) => t.id === taskId)
-  if (!task || task.completed) return reward
+  const result = completeTaskState({ task: { ...task, difficulty }, user: state.user })
+  if (result.alreadyCompleted) return result.reward
 
-  task.completed = true
-  task.completedAt = new Date().toISOString()
-  const u = state.user
-  u.petHealth = Math.min(100, (u.petHealth || 0) + reward.health)
-  u.coins = (u.coins || 0) + reward.coins
-  u.totalCoinsEarned = (u.totalCoinsEarned || 0) + reward.coins
-  u.tasksCompleted = (u.tasksCompleted || 0) + 1
-  u.lastUpdated = Date.now()
+  Object.assign(task, {
+    ...result.task,
+    completedAt: new Date(result.task.completedAt).toISOString(),
+  })
+  state.user = {
+    ...result.user,
+    level: getPetLevel(result.user.xp),
+  }
   saveRaw(state)
-  return reward
+  return result.reward
 }
 
 export function deleteTask(taskId) {
@@ -174,16 +169,16 @@ export function getInventory() {
 
 export function purchaseItem(item) {
   const state = loadRaw()
-  if (state.inventory.includes(item.id)) throw new Error('Already owned')
-  if ((state.user.coins || 0) < item.price) throw new Error('Not enough coins')
-  state.inventory.push(item.id)
-  state.user.coins -= item.price
+  const result = purchaseItemState({
+    user: state.user,
+    inventory: state.inventory,
+    item,
+  })
+  state.inventory = result.inventory
+  state.user = result.user
   saveRaw(state)
 }
 
 export function equipItem(itemId, equippedItems) {
-  const next = equippedItems.includes(itemId)
-    ? equippedItems.filter((i) => i !== itemId)
-    : [...equippedItems, itemId]
-  updateUserDoc({ equippedItems: next })
+  updateUserDoc({ equippedItems: toggleEquippedItem(equippedItems, itemId) })
 }

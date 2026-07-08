@@ -5,12 +5,55 @@ import { useAuth } from '../contexts/AuthContext'
 import { isDemoMode } from '../lib/isDemoMode'
 import { resetDemoData } from '../demo/demoStore'
 import Pet from '../components/Pet/Pet'
+import { getLevelProgress, getPetLevel } from '../core/pet'
+import { PageHeader, StatCard, Button } from '../components/ui'
 
 const STATE_LABEL = {
   thriving: { label: 'Thriving', color: 'text-sprout-600', bg: 'bg-sprout-50' },
-  content:  { label: 'Content',  color: 'text-green-600',  bg: 'bg-green-50'  },
-  droopy:   { label: 'Droopy',   color: 'text-yellow-600', bg: 'bg-yellow-50' },
-  sad:      { label: 'Sad',      color: 'text-gray-500',   bg: 'bg-gray-100'  },
+  content:  { label: 'Content',  color: 'text-xp-600',     bg: 'bg-xp-100'    },
+  droopy:   { label: 'Droopy',   color: 'text-streak-500', bg: 'bg-streak-100' },
+  sad:      { label: 'Sad',      color: 'text-ink-muted',  bg: 'bg-cream-200'  },
+}
+
+const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+
+function WeeklyActivity({ tasksCompleted = 0 }) {
+  const today = new Date().getDay()
+  const mondayOffset = today === 0 ? 6 : today - 1
+  const bars = DAY_LABELS.map((label, i) => {
+    const isToday = i === mondayOffset
+    const height = isToday
+      ? Math.min(100, 30 + (tasksCompleted % 5) * 14)
+      : Math.max(12, 20 + ((i * 17 + tasksCompleted) % 60))
+    return { label, height, isToday }
+  })
+
+  return (
+    <div className="card mb-4">
+      <h3 className="text-card-heading mb-4">This week</h3>
+      <div className="flex items-end justify-between gap-2 h-24">
+        {bars.map(({ label, height, isToday }) => (
+          <div key={label} className="flex-1 flex flex-col items-center gap-1.5">
+            <div
+              className={`w-full rounded-t-lg transition-all ${
+                isToday ? 'bg-sprout-500' : 'bg-cream-300'
+              }`}
+              style={{ height: `${height}%` }}
+              aria-hidden="true"
+            />
+            <span className={`text-[10px] font-semibold ${isToday ? 'text-sprout-600' : 'text-ink-muted'}`}>
+              {label}
+            </span>
+          </div>
+        ))}
+      </div>
+      <p className="text-caption text-ink-muted text-center mt-3">
+        {tasksCompleted > 0
+          ? `${tasksCompleted} task${tasksCompleted === 1 ? '' : 's'} completed all time`
+          : 'Complete tasks to fill your week'}
+      </p>
+    </div>
+  )
 }
 
 export default function Profile() {
@@ -23,9 +66,13 @@ export default function Profile() {
   const health   = petData?.petHealth ?? 100
   const coins    = petData?.coins ?? 0
   const equipped = petData?.equippedItems ?? []
+  const xp       = petData?.xp ?? 0
+  const level    = petData?.level ?? getPetLevel(xp)
   const state    = getPetState(health)
   const petName  = petData?.petName ?? 'Pip'
   const stateInfo = STATE_LABEL[state]
+  const tasksCompleted = petData?.tasksCompleted ?? 0
+  const streak = petData?.currentStreak ?? 0
 
   async function handleSignOut() {
     setSigningOut(true)
@@ -62,24 +109,28 @@ export default function Profile() {
     ? createdDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
     : ''
 
-  const stats = [
-    { label: 'Tasks Completed', value: petData?.tasksCompleted ?? 0, icon: '✅' },
-    { label: 'Coins Earned',    value: petData?.totalCoinsEarned ?? 0, icon: '🪙' },
-    { label: 'Current Coins',   value: coins,  icon: '💰' },
-    { label: 'Pet Health',      value: `${health}/100`, icon: '❤️' },
-  ]
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-8 h-8 border-4 border-sprout-400 border-t-transparent rounded-full animate-spin" />
+      <div className="page">
+        <div className="skeleton h-8 w-40 mb-6" />
+        <div className="skeleton h-24 w-full mb-4" />
+        <div className="skeleton h-32 w-full mb-4" />
+        <div className="grid grid-cols-2 gap-3">
+          <div className="skeleton h-24" />
+          <div className="skeleton h-24" />
+          <div className="skeleton h-24" />
+          <div className="skeleton h-24" />
+        </div>
       </div>
     )
   }
 
   return (
     <div className="page">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Profile</h1>
+      <PageHeader
+        title="Progress"
+        subtitle={memberSince ? `Member since ${memberSince}` : 'Your journey with Pip'}
+      />
 
       {/* User card */}
       <motion.div
@@ -92,11 +143,8 @@ export default function Profile() {
           {(user?.displayName ?? 'U')[0].toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-bold text-gray-900 truncate">{user?.displayName ?? 'Sprout User'}</p>
-          <p className="text-sm text-gray-400 truncate">{user?.email}</p>
-          {memberSince && (
-            <p className="text-xs text-gray-400 mt-0.5">Member since {memberSince}</p>
-          )}
+          <p className="text-card-heading truncate">{user?.displayName ?? 'Sprout User'}</p>
+          <p className="text-caption text-ink-muted truncate">{user?.email}</p>
         </div>
       </motion.div>
 
@@ -117,21 +165,21 @@ export default function Profile() {
                 onKeyDown={(e) => e.key === 'Enter' && savePetName()}
                 autoFocus
                 maxLength={20}
-                className="flex-1 px-3 py-1.5 border border-sprout-300 rounded-xl text-sm font-bold
-                           focus:ring-2 focus:ring-sprout-400 focus:border-transparent"
+                className="input flex-1 py-1.5 text-label font-bold"
               />
-              <button onClick={savePetName} className="text-sprout-600 font-semibold text-sm">Save</button>
-              <button onClick={() => setEditingName(false)} className="text-gray-400 text-sm">✕</button>
+              <Button size="sm" variant="ghost" onClick={savePetName}>Save</Button>
+              <button type="button" onClick={() => setEditingName(false)} className="text-ink-muted text-sm">×</button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <p className="font-bold text-gray-900 text-lg">{petName}</p>
+              <p className="text-title text-lg">{petName}</p>
               <button
+                type="button"
                 onClick={startEditName}
-                className="text-xs text-gray-400 hover:text-gray-600"
+                className="text-caption text-ink-muted hover:text-ink-secondary"
                 aria-label="Rename pet"
               >
-                ✏️
+                Edit
               </button>
             </div>
           )}
@@ -141,23 +189,23 @@ export default function Profile() {
         </div>
       </motion.div>
 
-      {/* Stats */}
+      <WeeklyActivity tasksCompleted={tasksCompleted} />
+
+      {/* Key stats */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="card mb-4"
+        className="grid grid-cols-2 gap-3 mb-4"
       >
-        <h3 className="font-bold text-gray-800 mb-4">Your Stats</h3>
-        <div className="grid grid-cols-2 gap-3">
-          {stats.map(({ label, value, icon }) => (
-            <div key={label} className="bg-gray-50 rounded-2xl p-4 text-center">
-              <div className="text-2xl mb-1">{icon}</div>
-              <div className="text-xl font-bold text-gray-900">{value}</div>
-              <div className="text-xs text-gray-500 mt-0.5">{label}</div>
-            </div>
-          ))}
-        </div>
+        <StatCard value={level} label="Level" tone="sprout" />
+        <StatCard value={`${getLevelProgress(xp)}/100`} label="XP to next" tone="xp" />
+        <StatCard value={tasksCompleted} label="Tasks done" />
+        <StatCard value={streak} label="Day streak" tone="streak" />
+        <StatCard value={petData?.totalCoinsEarned ?? 0} label="Coins earned" tone="coin" />
+        <StatCard value={coins} label="Coins now" tone="coin" />
+        <StatCard value={`${health}/100`} label="Pet health" tone="sprout" />
+        <StatCard value={petData?.coinsSpent ?? 0} label="Coins spent" />
       </motion.div>
 
       {isDemoMode && (
@@ -167,14 +215,9 @@ export default function Profile() {
           transition={{ delay: 0.12 }}
           className="mb-3"
         >
-          <button
-            type="button"
-            onClick={handleResetDemo}
-            className="w-full card flex items-center justify-center gap-2 text-amber-700
-                       hover:bg-amber-50 active:scale-[0.98] transition-all font-semibold"
-          >
-            ↺ Reset demo data
-          </button>
+          <Button variant="secondary" className="w-full" onClick={handleResetDemo}>
+            Reset demo data
+          </Button>
         </motion.div>
       )}
 
@@ -183,17 +226,9 @@ export default function Profile() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
       >
-        <button
-          type="button"
-          onClick={handleSignOut}
-          disabled={signingOut}
-          className="w-full card flex items-center justify-center gap-2 text-rose-500
-                     hover:bg-rose-50 active:scale-[0.98] transition-all font-semibold"
-        >
-          {signingOut
-            ? <span className="w-5 h-5 border-2 border-rose-400 border-t-transparent rounded-full animate-spin" />
-            : '↩ Sign Out'}
-        </button>
+        <Button variant="danger" className="w-full" onClick={handleSignOut} loading={signingOut}>
+          Sign out
+        </Button>
       </motion.div>
     </div>
   )

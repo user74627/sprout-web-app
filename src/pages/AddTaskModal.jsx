@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useTasks } from '../hooks/useTasks'
+import { getRewardPreview } from '../core/rewards'
+import Button from '../components/ui/Button'
 
 const DIFFICULTIES = [
-  { id: 'easy',   label: 'Easy',   icon: '🌱', desc: '+10 HP, +5 coins',  color: 'border-blue-300 bg-blue-50 text-blue-700'   },
-  { id: 'medium', label: 'Medium', icon: '⚡', desc: '+20 HP, +15 coins', color: 'border-amber-300 bg-amber-50 text-amber-700' },
-  { id: 'hard',   label: 'Hard',   icon: '🔥', desc: '+35 HP, +30 coins', color: 'border-rose-300 bg-rose-50 text-rose-700'   },
+  { id: 'easy',   label: 'Easy',   icon: '🌱', active: 'border-easy-600 bg-easy-100 text-easy-700' },
+  { id: 'medium', label: 'Medium', icon: '⚡', active: 'border-coin-500 bg-coin-100 text-coin-700' },
+  { id: 'hard',   label: 'Hard',   icon: '🔥', active: 'border-hard-600 bg-hard-100 text-hard-700' },
 ]
 
 export default function AddTaskModal({ onClose }) {
@@ -28,32 +30,29 @@ export default function AddTaskModal({ onClose }) {
       className="fixed inset-0 z-50 flex items-end justify-center"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
-      {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-ink/40 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Sheet */}
       <motion.div
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-        className="relative w-full max-w-md bg-white rounded-t-4xl px-5 pt-5 pb-8 z-10 shadow-2xl"
+        className="relative w-full max-w-md bg-surface-elevated rounded-t-4xl px-5 pt-5 pb-8 z-10 shadow-lift"
+        style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}
       >
-        {/* Handle */}
-        <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5" />
+        <div className="w-10 h-1 bg-line-strong rounded-full mx-auto mb-5" />
 
-        <h3 className="text-xl font-bold text-gray-900 mb-5">New Task</h3>
+        <h3 className="text-title text-ink mb-5">New Task</h3>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-          {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-label text-ink-secondary mb-1.5">
               What do you need to do?
             </label>
             <input
@@ -62,14 +61,12 @@ export default function AddTaskModal({ onClose }) {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="E.g. Study for 30 minutes…"
               autoFocus
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm
-                         focus:ring-2 focus:ring-sprout-400 focus:border-transparent transition-all"
+              className="input"
             />
           </div>
 
-          {/* Difficulty */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-label text-ink-secondary mb-2">
               Difficulty
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -79,28 +76,25 @@ export default function AddTaskModal({ onClose }) {
                   type="button"
                   onClick={() => setDifficulty(d.id)}
                   className={`flex flex-col items-center gap-1 p-3 rounded-2xl border-2 transition-all duration-150 ${
-                    difficulty === d.id ? d.color : 'border-gray-100 bg-gray-50 text-gray-500'
+                    difficulty === d.id ? d.active : 'border-line-subtle bg-cream-50 text-ink-muted'
                   }`}
                 >
-                  <span className="text-xl">{d.icon}</span>
-                  <span className="text-xs font-bold">{d.label}</span>
-                  <span className="text-[10px] opacity-75">{d.desc}</span>
+                  <span className="text-xl" aria-hidden="true">{d.icon}</span>
+                  <span className="text-caption font-bold">{d.label}</span>
+                  <span className="text-[10px] opacity-75 tabular">{getRewardPreview(d.id)}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          <button
+          <Button
             type="submit"
-            disabled={!title.trim() || saving}
-            className={`btn-primary w-full flex items-center justify-center gap-2 ${
-              !title.trim() ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            className="w-full"
+            disabled={!title.trim()}
+            loading={saving}
           >
-            {saving
-              ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              : '+ Add Task'}
-          </button>
+            Add Task
+          </Button>
         </form>
       </motion.div>
     </div>

@@ -1,0 +1,64 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function owns(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    match /shopItems/{itemId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /users/{userId} {
+      allow create: if owns(userId);
+      allow read: if owns(userId);
+
+      // Keep profile settings client-editable, but reserve economy fields for Functions.
+      allow update: if owns(userId)
+        && request.resource.data.diff(resource.data).changedKeys()
+          .hasOnly(['displayName', 'petName', 'equippedItems', 'lastUpdated']);
+
+      allow delete: if false;
+
+      match /tasks/{taskId} {
+        allow read: if owns(userId);
+        allow create: if owns(userId)
+          && request.resource.data.completed == false
+          && request.resource.data.keys().hasOnly([
+            'title',
+            'difficulty',
+            'category',
+            'notes',
+            'dueDate',
+            'recurrence',
+            'completed',
+            'createdAt'
+          ]);
+
+        // Title/details edits are allowed while incomplete. Completion rewards go through Functions.
+        allow update: if owns(userId)
+          && resource.data.completed == false
+          && request.resource.data.completed == false;
+
+        allow delete: if owns(userId) && resource.data.completed == false;
+      }
+
+      match /inventory/{itemId} {
+        allow read: if owns(userId);
+        allow write: if false;
+      }
+
+      match /events/{eventId} {
+        allow read: if owns(userId);
+        allow write: if false;
+      }
+    }
+  }
+}
+

@@ -2,6 +2,7 @@ import { isDemoMode } from '../lib/isDemoMode'
 
 export let auth = null
 export let db = null
+export let app = null
 
 if (!isDemoMode) {
   const { initializeApp } = await import('firebase/app')
@@ -17,9 +18,9 @@ if (!isDemoMode) {
     appId:             import.meta.env.VITE_FIREBASE_APP_ID,
   }
 
-  const app = initializeApp(firebaseConfig)
+  app = initializeApp(firebaseConfig)
   auth = getAuth(app)
   db = getFirestore(app)
 }
 
-export default null
+export default app

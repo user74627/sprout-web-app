@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "Sprout",
+    "slug": "sprout-productivity-pet",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "scheme": "sprout",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.sprout.productivity"
+    },
+    "android": {
+      "package": "app.sprout.productivity"
+    },
+    "plugins": [
+      "expo-notifications"
+    ],
+    "extra": {
+      "demoMode": true
+    }
+  }
+}
+

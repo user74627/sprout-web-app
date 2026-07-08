@@ -37,12 +37,13 @@ const links = [
   },
   {
     to: '/profile',
-    label: 'Profile',
+    label: 'Progress',
     icon: (active) => (
-      <svg viewBox="0 0 24 24" width="22" height="22" fill={active ? 'currentColor' : 'none'}
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none"
         stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
+        <path d="M18 20V10" />
+        <path d="M12 20V4" />
+        <path d="M6 20v-6" />
       </svg>
     ),
   },
@@ -50,10 +51,12 @@ const links = [
 
 export default function Navbar() {
   return (
-    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md
-                    bg-white/90 backdrop-blur-sm border-t border-gray-100
-                    flex items-center justify-around px-2 py-2 z-50
-                    safe-area-bottom">
+    <nav
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md
+                 bg-surface-elevated/95 backdrop-blur-md border-t border-line-subtle
+                 flex items-center justify-around px-2 py-2 z-50"
+      style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
+    >
       {links.map(({ to, label, icon }) => (
         <NavLink
           key={to}
@@ -63,7 +66,7 @@ export default function Navbar() {
             `flex flex-col items-center gap-0.5 px-4 py-2 rounded-2xl transition-all duration-150 ${
               isActive
                 ? 'text-sprout-600 bg-sprout-50'
-                : 'text-gray-400 hover:text-gray-600'
+                : 'text-ink-muted hover:text-ink-secondary'
             }`
           }
         >

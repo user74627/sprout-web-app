@@ -1,0 +1,80 @@
+[
+  {
+    "id": "star",
+    "name": "Gold Star",
+    "price": 50,
+    "emoji": "⭐",
+    "category": "badge",
+    "description": "You're a star!",
+    "slot": "badge",
+    "requiredLevel": 1,
+    "active": true
+  },
+  {
+    "id": "sunglasses",
+    "name": "Cool Shades",
+    "price": 75,
+    "emoji": "😎",
+    "category": "face",
+    "description": "Too cool for weeds.",
+    "slot": "face",
+    "requiredLevel": 1,
+    "active": true
+  },
+  {
+    "id": "bowtie",
+    "name": "Bow Tie",
+    "price": 80,
+    "emoji": "🎀",
+    "category": "neck",
+    "description": "Looking fancy!",
+    "slot": "neck",
+    "requiredLevel": 2,
+    "active": true
+  },
+  {
+    "id": "partyhat",
+    "name": "Party Hat",
+    "price": 100,
+    "emoji": "🎉",
+    "category": "hat",
+    "description": "Every day is a party!",
+    "slot": "hat",
+    "requiredLevel": 2,
+    "active": true
+  },
+  {
+    "id": "floral",
+    "name": "Flower Crown",
+    "price": 120,
+    "emoji": "🌸",
+    "category": "hat",
+    "description": "Bloom where you are planted.",
+    "slot": "hat",
+    "requiredLevel": 3,
+    "active": true
+  },
+  {
+    "id": "crown",
+    "name": "Royal Crown",
+    "price": 150,
+    "emoji": "👑",
+    "category": "hat",
+    "description": "Fit for plant royalty.",
+    "slot": "hat",
+    "requiredLevel": 4,
+    "active": true
+  },
+  {
+    "id": "rainbow",
+    "name": "Rainbow",
+    "price": 200,
+    "emoji": "🌈",
+    "category": "background",
+    "description": "Magical vibes only.",
+    "slot": "background",
+    "requiredLevel": 5,
+    "active": true
+  }
+]
+

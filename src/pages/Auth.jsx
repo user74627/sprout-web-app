@@ -2,6 +2,13 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
 import { isDemoMode } from '../lib/isDemoMode'
+import { SegmentedControl, Button } from '../components/ui'
+
+const DEMO_STEPS = [
+  { icon: '✅', title: 'Complete tasks', desc: 'Check off to-dos and earn health, coins, and XP.' },
+  { icon: '🌱', title: 'Grow your pet', desc: 'Pip thrives when you stay consistent.' },
+  { icon: '🛍️', title: 'Shop & equip', desc: 'Spend coins on accessories for your sprout.' },
+]
 
 export default function Auth() {
   const { enterDemo } = useAuth()
@@ -44,58 +51,62 @@ export default function Auth() {
     }
   }
 
+  const BrandHeader = () => (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col items-center mb-8"
+    >
+      <div className="w-20 h-20 bg-sprout-500 rounded-3xl flex items-center justify-center mb-4 shadow-soft">
+        <span className="text-4xl" aria-hidden="true">🌱</span>
+      </div>
+      <h1 className="text-display text-ink">Sprout</h1>
+      <p className="text-caption text-ink-secondary mt-1 text-center max-w-xs">
+        Grow your goals, one task at a time.
+      </p>
+    </motion.div>
+  )
+
   if (isDemoMode) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-sprout-50 to-cream-100 flex flex-col items-center justify-center px-6 py-12">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col items-center mb-10"
-        >
-          <div className="w-20 h-20 bg-sprout-500 rounded-3xl flex items-center justify-center mb-4 shadow-soft">
-            <span className="text-4xl">🌱</span>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900">Sprout</h1>
-          <p className="text-gray-500 mt-1 text-center text-sm max-w-xs">
-            Try the demo — no sign-up, no Firebase. Your pet and tasks are saved in this browser.
-          </p>
-        </motion.div>
+      <div className="min-h-screen bg-surface-canvas flex flex-col items-center justify-center px-6 py-12">
+        <BrandHeader />
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full card shadow-soft text-center"
+          className="w-full card shadow-soft"
         >
-          <p className="text-sm text-gray-600 mb-6">
-            Sample tasks and coins are already loaded so you can explore the shop and complete tasks right away.
+          <p className="text-body text-ink-secondary text-center mb-6">
+            Try the live demo — no sign-up required. Everything saves in this browser.
           </p>
-          <button
-            type="button"
-            onClick={enterDemo}
-            className="btn-primary w-full text-lg py-4"
-          >
+
+          <div className="flex flex-col gap-3 mb-6">
+            {DEMO_STEPS.map((step, i) => (
+              <div key={step.title} className="flex items-start gap-3 p-3 rounded-2xl bg-cream-100">
+                <span className="text-xl flex-shrink-0" aria-hidden="true">{step.icon}</span>
+                <div>
+                  <p className="text-label text-ink">
+                    <span className="text-ink-muted mr-1.5">{i + 1}.</span>
+                    {step.title}
+                  </p>
+                  <p className="text-caption text-ink-muted mt-0.5">{step.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <Button size="md" className="w-full text-lg py-4" onClick={enterDemo}>
             Start Demo
-          </button>
+          </Button>
         </motion.div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sprout-50 to-cream-100 flex flex-col items-center justify-center px-6 py-12">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col items-center mb-10"
-      >
-        <div className="w-20 h-20 bg-sprout-500 rounded-3xl flex items-center justify-center mb-4 shadow-soft">
-          <span className="text-4xl">🌱</span>
-        </div>
-        <h1 className="text-3xl font-bold text-gray-900">Sprout</h1>
-        <p className="text-gray-500 mt-1 text-center text-sm">
-          Grow your goals, one task at a time.
-        </p>
-      </motion.div>
+    <div className="min-h-screen bg-surface-canvas flex flex-col items-center justify-center px-6 py-12">
+      <BrandHeader />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -103,20 +114,15 @@ export default function Auth() {
         transition={{ delay: 0.1 }}
         className="w-full card shadow-soft"
       >
-        <div className="flex bg-gray-100 rounded-2xl p-1 mb-6">
-          {['login', 'signup'].map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => { setMode(m); setError('') }}
-              className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                mode === m ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
-              }`}
-            >
-              {m === 'login' ? 'Log In' : 'Sign Up'}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          options={[
+            { id: 'login', label: 'Log In' },
+            { id: 'signup', label: 'Sign Up' },
+          ]}
+          value={mode}
+          onChange={(m) => { setMode(m); setError('') }}
+          className="mb-6"
+        />
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <AnimatePresence>
@@ -129,42 +135,39 @@ export default function Auth() {
                 transition={{ duration: 0.2 }}
                 className="overflow-hidden"
               >
-                <label className="block text-sm font-medium text-gray-700 mb-1">Your name</label>
+                <label className="block text-label text-ink-secondary mb-1">Your name</label>
                 <input
                   type="text"
                   value={form.name}
                   onChange={(e) => setField('name', e.target.value)}
                   placeholder="What should we call you?"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm
-                             focus:ring-2 focus:ring-sprout-400 focus:border-transparent transition-all"
+                  className="input"
                 />
               </motion.div>
             )}
           </AnimatePresence>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-label text-ink-secondary mb-1">Email</label>
             <input
               type="email"
               value={form.email}
               onChange={(e) => setField('email', e.target.value)}
               placeholder="you@example.com"
               autoComplete="email"
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm
-                         focus:ring-2 focus:ring-sprout-400 focus:border-transparent transition-all"
+              className="input"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label className="block text-label text-ink-secondary mb-1">Password</label>
             <input
               type="password"
               value={form.password}
               onChange={(e) => setField('password', e.target.value)}
               placeholder="At least 6 characters"
               autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm
-                         focus:ring-2 focus:ring-sprout-400 focus:border-transparent transition-all"
+              className="input"
             />
           </div>
 
@@ -172,26 +175,20 @@ export default function Auth() {
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-rose-600 text-sm bg-rose-50 border border-rose-200 rounded-xl px-4 py-2.5"
+              className="text-danger-600 text-caption bg-danger-50 border border-danger-200 rounded-2xl px-4 py-2.5"
             >
               {error}
             </motion.p>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full mt-2 flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : mode === 'login' ? 'Log In' : 'Create Account'}
-          </button>
+          <Button type="submit" className="w-full mt-2" loading={loading}>
+            {mode === 'login' ? 'Log In' : 'Create Account'}
+          </Button>
         </form>
       </motion.div>
 
-      <p className="text-xs text-gray-400 text-center mt-6 px-4">
-        Your pet Pip is waiting for you 🌱
+      <p className="text-caption text-ink-muted text-center mt-6 px-4">
+        Your pet Pip is waiting for you
       </p>
     </div>
   )

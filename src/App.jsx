@@ -10,7 +10,7 @@ import DemoBanner from './components/DemoBanner/DemoBanner'
 
 function Spinner() {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-cream-100">
+    <div className="flex items-center justify-center min-h-screen bg-surface-canvas">
       <div className="w-10 h-10 border-4 border-sprout-500 border-t-transparent rounded-full animate-spin" />
     </div>
   )
@@ -30,7 +30,7 @@ export default function App() {
 
   return (
     <HashRouter>
-      <div className="max-w-md mx-auto min-h-screen relative">
+      <div className="app-shell">
         <DemoBanner />
         <Routes>
           <Route

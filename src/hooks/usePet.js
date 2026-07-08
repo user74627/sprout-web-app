@@ -2,13 +2,8 @@ import { useEffect, useState, useCallback } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { isDemoMode } from '../lib/isDemoMode'
 import * as demo from '../demo/demoStore'
-
-export function getPetState(health) {
-  if (health >= 75) return 'thriving'
-  if (health >= 45) return 'content'
-  if (health >= 20) return 'droopy'
-  return 'sad'
-}
+export { getPetState } from '../core/pet'
+import { getPetState, calculateHealthDecay } from '../core/pet'
 
 export function usePet() {
   const { user } = useAuth()
@@ -48,8 +43,7 @@ export function usePet() {
 
         if (!decayApplied) {
           const lastMs = data.lastUpdated?.toMillis?.() ?? Date.now()
-          const hoursSince = (Date.now() - lastMs) / 3_600_000
-          const decay = Math.floor(hoursSince * 3)
+          const decay = calculateHealthDecay(lastMs)
           if (decay > 0) {
             decayApplied = true
             const newHealth = Math.max(0, (data.petHealth ?? 100) - decay)

@@ -1,4 +1,6 @@
 import { motion } from 'framer-motion'
+import { CoinIcon } from '../ui/CoinPill'
+import Button from '../ui/Button'
 
 export default function ShopItem({
   item,
@@ -10,60 +12,54 @@ export default function ShopItem({
   buying,
 }) {
   const canAfford = coins >= item.price
-  const isOwned = owned
-  const isEquipped = equipped
 
   return (
     <motion.div
       layout
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className={`card flex flex-col items-center gap-2 text-center relative
-        ${isOwned ? 'ring-2 ring-sprout-300' : ''}`}
+      className={`card flex flex-col items-center gap-2 text-center relative overflow-hidden
+        ${owned ? 'ring-2 ring-sprout-300 bg-sprout-50/30' : ''}
+        ${equipped ? 'ring-2 ring-xp-400' : ''}`}
     >
-      {isOwned && (
-        <span className="absolute top-3 right-3 text-[10px] font-bold text-sprout-600 bg-sprout-100 px-1.5 py-0.5 rounded-full">
-          OWNED
+      {owned && (
+        <span className="absolute top-3 right-3 text-[10px] font-bold text-sprout-700 bg-sprout-100 px-2 py-0.5 rounded-full">
+          {equipped ? 'ON' : 'OWNED'}
         </span>
       )}
 
-      {/* Emoji */}
-      <div className="text-5xl leading-none mt-1 select-none">{item.emoji}</div>
+      <div className="text-5xl leading-none mt-1 select-none" aria-hidden="true">{item.emoji}</div>
 
-      {/* Info */}
       <div>
-        <p className="font-semibold text-sm text-gray-800">{item.name}</p>
-        <p className="text-xs text-gray-400 mt-0.5 leading-snug">{item.description}</p>
+        <p className="text-card-heading text-sm">{item.name}</p>
+        <p className="text-caption text-ink-muted mt-0.5 leading-snug">{item.description}</p>
       </div>
 
-      {/* Price */}
-      <div className="flex items-center gap-1 text-sm font-bold text-coin-600">
-        <span>🪙</span>
+      <div className="flex items-center gap-1 text-label font-bold text-coin-600 tabular">
+        <CoinIcon size={16} />
         <span>{item.price}</span>
       </div>
 
-      {/* Action button */}
-      {isOwned ? (
-        <button
+      {owned ? (
+        <Button
+          size="sm"
+          variant={equipped ? 'primary' : 'secondary'}
+          className="w-full"
           onClick={() => onToggleEquip(item.id)}
-          className={`w-full btn text-sm py-2 ${
-            isEquipped
-              ? 'bg-sprout-500 text-white hover:bg-sprout-600'
-              : 'btn-secondary'
-          }`}
         >
-          {isEquipped ? '✓ Equipped' : 'Equip'}
-        </button>
+          {equipped ? 'Equipped' : 'Equip'}
+        </Button>
       ) : (
-        <button
-          onClick={() => onBuy(item)}
+        <Button
+          size="sm"
+          variant={canAfford ? 'primary' : 'secondary'}
+          className={`w-full ${!canAfford ? 'opacity-60' : ''}`}
           disabled={!canAfford || buying}
-          className={`w-full btn text-sm py-2 ${
-            canAfford ? 'btn-primary' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-          }`}
+          onClick={() => onBuy(item)}
+          loading={buying}
         >
-          {buying ? '...' : canAfford ? 'Buy' : 'Need more coins'}
-        </button>
+          {canAfford ? 'Buy' : 'Need coins'}
+        </Button>
       )}
     </motion.div>
   )

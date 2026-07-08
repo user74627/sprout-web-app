@@ -64,8 +64,4 @@ export const SHOP_ITEMS = [
   },
 ]
 
-export const TASK_REWARDS = {
-  easy:   { health: 10, coins: 5  },
-  medium: { health: 20, coins: 15 },
-  hard:   { health: 35, coins: 30 },
-}
+export { TASK_REWARDS } from '../core/rewards'

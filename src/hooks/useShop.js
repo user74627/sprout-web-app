@@ -47,8 +47,8 @@ export function useShop() {
         if (isDemoMode) {
           demo.purchaseItem(item)
         } else {
-          const { purchaseItem: dbPurchaseItem } = await import('../firebase/db')
-          await dbPurchaseItem(user.uid, item)
+          const { purchaseItemWithBackend } = await import('../firebase/functions')
+          await purchaseItemWithBackend(item.id)
         }
         return { success: true }
       } catch (err) {

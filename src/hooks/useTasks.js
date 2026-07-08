@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { isDemoMode } from '../lib/isDemoMode'
 import * as demo from '../demo/demoStore'
+import { isTaskFromToday } from '../core/tasks'
 
 export function useTasks() {
   const { user } = useAuth()
@@ -57,8 +58,8 @@ export function useTasks() {
       const reward = isDemoMode
         ? demo.completeTask(taskId, difficulty)
         : await (async () => {
-            const { completeTask: dbCompleteTask } = await import('../firebase/db')
-            return dbCompleteTask(user.uid, taskId, difficulty)
+            const { completeTaskWithBackend } = await import('../firebase/functions')
+            return completeTaskWithBackend(taskId)
           })()
       setLastReward(reward)
       setTimeout(() => setLastReward(null), 2500)
@@ -79,16 +80,7 @@ export function useTasks() {
     [user],
   )
 
-  const todaysTasks = tasks.filter((t) => {
-    if (!t.createdAt) return true
-    const created = t.createdAt.toDate?.() ?? new Date(t.createdAt)
-    const today = new Date()
-    return (
-      created.getDate() === today.getDate() &&
-      created.getMonth() === today.getMonth() &&
-      created.getFullYear() === today.getFullYear()
-    )
-  })
+  const todaysTasks = tasks.filter((t) => isTaskFromToday(t))
 
   return { tasks, todaysTasks, loading, lastReward, addTask, completeTask, deleteTask }
 }
