@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { SegmentedControl, Button } from '../components/ui'
 import { useAuth } from '../contexts/AuthContext'
 import { isDemoMode } from '../lib/isDemoMode'
-import { SegmentedControl, Button } from '../components/ui'
 
 const DEMO_STEPS = [
   { icon: '✅', title: 'Complete tasks', desc: 'Check off to-dos and earn health, coins, and XP.' },
@@ -13,6 +13,7 @@ const DEMO_STEPS = [
 export default function Auth() {
   const { enterDemo } = useAuth()
   const [mode, setMode] = useState('login')
+  const [showDemo, setShowDemo] = useState(isDemoMode)
   const [form, setForm] = useState({ name: '', email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -67,7 +68,7 @@ export default function Auth() {
     </motion.div>
   )
 
-  if (isDemoMode) {
+  if (showDemo) {
     return (
       <div className="min-h-screen bg-surface-canvas flex flex-col items-center justify-center px-6 py-12">
         <BrandHeader />
@@ -99,6 +100,14 @@ export default function Auth() {
           <Button size="md" className="w-full text-lg py-4" onClick={enterDemo}>
             Start Demo
           </Button>
+
+          <button
+            type="button"
+            onClick={() => setShowDemo(false)}
+            className="w-full mt-3 text-sm text-ink-muted underline"
+          >
+            Or sign in with an existing account
+          </button>
         </motion.div>
       </div>
     )
