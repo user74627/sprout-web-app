@@ -146,6 +146,27 @@
   }
 }
 
+/* Website view (full-width desktop desktop) */
+@media (min-width: 1024px) {
+  [data-view-mode='website'] .app-shell {
+    max-width: none !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    min-height: 100vh;
+    background: transparent;
+    box-shadow: none;
+  }
+  [data-view-mode='website'] .page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+  [data-view-mode='website'] .card {
+    background: #fffdf9;
+  }
+}
+
 /* Respect users who prefer less motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

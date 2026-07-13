@@ -7,6 +7,7 @@ import Shop from './pages/Shop'
 import Profile from './pages/Profile'
 import Navbar from './components/Navbar/Navbar'
 import DemoBanner from './components/DemoBanner/DemoBanner'
+import ViewModeToggle from './components/ViewModeToggle/ViewModeToggle'
 
 function Spinner() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
     <HashRouter>
       <div className="app-shell">
         <DemoBanner />
+        <ViewModeToggle />
         <Routes>
           <Route
             path="/auth"
