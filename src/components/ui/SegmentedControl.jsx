@@ -1,6 +1,6 @@
 export default function SegmentedControl({ options, value, onChange, className = '' }) {
   return (
-    <div className={`flex bg-cream-200 rounded-2xl p-1 overflow-x-auto scrollbar-hide ${className}`} role="tablist">
+    <div className={`flex bg-soil-100 rounded-lg p-1 overflow-x-auto scrollbar-hide ${className}`} role="tablist">
       {options.map((option) => {
         const id = typeof option === 'string' ? option : option.id
         const label = typeof option === 'string' ? option : option.label
@@ -12,10 +12,11 @@ export default function SegmentedControl({ options, value, onChange, className =
             role="tab"
             aria-selected={active}
             onClick={() => onChange(id)}
-            className={`flex-1 min-w-max px-3 py-2 rounded-xl text-label capitalize transition-all duration-150 ${
+            className={`flex-1 min-w-max px-3 py-2 rounded-md text-xs font-medium capitalize
+              transition-all duration-150 focus-visible:ring-2 focus-visible:ring-sprout-400 ${
               active
-                ? 'bg-surface-elevated text-ink shadow-sm'
-                : 'text-ink-muted hover:text-ink-secondary'
+                ? 'bg-white text-soil-800 shadow-sm'
+                : 'text-soil-400 hover:text-soil-600'
             }`}
           >
             {label}

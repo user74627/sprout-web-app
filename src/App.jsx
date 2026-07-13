@@ -11,8 +11,8 @@ import ViewModeToggle from './components/ViewModeToggle/ViewModeToggle'
 
 function Spinner() {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-surface-canvas">
-      <div className="w-10 h-10 border-4 border-sprout-500 border-t-transparent rounded-full animate-spin" />
+    <div className="flex items-center justify-center min-h-screen bg-soil-50">
+      <div className="w-10 h-10 border-4 border-sprout-400 border-t-transparent rounded-full animate-spin" />
     </div>
   )
 }

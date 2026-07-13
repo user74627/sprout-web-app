@@ -21,7 +21,7 @@ export default function ViewModeToggle() {
     <button
       type="button"
       onClick={() => setMode(nextMode)}
-      className="fixed bottom-20 right-4 z-40 bg-surface-elevated border border-line-subtle rounded-full px-3 py-2 shadow-card text-caption font-semibold text-ink"
+      className="fixed bottom-20 right-4 z-40 bg-white/90 backdrop-blur-sm border border-soil-200/50 rounded-full px-3 py-2 shadow-sm text-xs font-medium text-soil-600 transition-colors duration-150 hover:bg-soil-50 focus-visible:ring-2 focus-visible:ring-sprout-400"
       title={label}
       aria-label={label}
     >

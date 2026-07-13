@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
+import { Plus } from 'lucide-react'
 import TaskCard from '../components/TaskCard/TaskCard'
 import { useTasks } from '../hooks/useTasks'
 import AddTaskModal from './AddTaskModal'
@@ -32,7 +33,7 @@ export default function TaskList() {
         subtitle={`${todayCount} today · ${activeCount} active · ${completedCount} completed`}
         action={
           <Button size="sm" onClick={() => setShowAddModal(true)}>
-            <span className="text-lg leading-none" aria-hidden="true">+</span> Add
+            <Plus size={16} aria-hidden="true" /> Add
           </Button>
         }
       />
@@ -45,10 +46,10 @@ export default function TaskList() {
       />
 
       {loading ? (
-        <div className="flex flex-col gap-3">
-          <div className="skeleton h-20 w-full" />
-          <div className="skeleton h-20 w-full" />
-          <div className="skeleton h-20 w-full" />
+        <div className="flex flex-col gap-2">
+          <div className="skeleton h-16 w-full" />
+          <div className="skeleton h-16 w-full" />
+          <div className="skeleton h-16 w-full" />
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
@@ -67,7 +68,7 @@ export default function TaskList() {
           }
         />
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="card-flat divide-y divide-line-subtle p-0 overflow-hidden">
           <AnimatePresence>
             {filtered.map((task) => (
               <TaskCard
@@ -76,6 +77,7 @@ export default function TaskList() {
                 onComplete={completeTask}
                 onDelete={deleteTask}
                 showDate
+                variant="row"
               />
             ))}
           </AnimatePresence>

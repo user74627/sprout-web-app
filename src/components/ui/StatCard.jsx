@@ -1,21 +1,23 @@
-export default function StatCard({ icon, value, label, tone = 'default', children }) {
-  const toneClass = {
-    default: 'text-ink',
-    sprout: 'text-sprout-600',
-    coin: 'text-coin-600',
-    xp: 'text-xp-600',
-    streak: 'text-streak-500',
-  }[tone] || 'text-ink'
+import KpiCard from './KpiCard'
+
+export default function StatCard({ icon, value, label, unit, tone = 'default', trend, trendValue, children }) {
+  if (children) {
+    return (
+      <KpiCard className="items-center text-center py-3">
+        {icon && <div className="mb-1">{icon}</div>}
+        {children}
+      </KpiCard>
+    )
+  }
 
   return (
-    <div className="card p-3 text-center flex flex-col items-center justify-center gap-0.5">
-      {children ?? (
-        <>
-          {icon && <div className="mb-0.5">{icon}</div>}
-          <p className={`text-stat-value ${toneClass}`}>{value}</p>
-          <p className="text-stat-label">{label}</p>
-        </>
-      )}
-    </div>
+    <KpiCard
+      title={label}
+      value={value}
+      unit={unit}
+      tone={tone}
+      trend={trend}
+      trendValue={trendValue}
+    />
   )
 }
