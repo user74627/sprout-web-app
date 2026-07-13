@@ -10,6 +10,37 @@ const DEMO_STEPS = [
   { icon: '🛍️', title: 'Shop & equip', desc: 'Spend coins on accessories for your sprout.' },
 ]
 
+function GoogleButton({ loading, setLoading, setError }) {
+  async function handleGoogle() {
+    setLoading(true)
+    try {
+      const { signInWithGoogle } = await import('../firebase/auth')
+      await signInWithGoogle()
+    } catch (err) {
+      setError(err.message || 'Google sign-in failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleGoogle}
+      disabled={loading}
+      className="w-full flex items-center justify-center gap-2 bg-white border border-line-subtle rounded-2xl py-3 font-semibold text-ink hover:bg-cream-50 transition-colors disabled:opacity-50"
+    >
+      <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.76 1.23 9.26 3.24l6.85-6.85C35.2 2.4 30.01.5 24 .5 16.2 0 9.42 3.58 5.27 9.08l7.93 6.2c2.2-1.99 5.15-3.63 9.55-3.63z"/>
+        <path fill="#4285F4" d="M46.11 24.5c0-1.77-.15-3.49-.42-5.14H24v9.7h12.5c-.67 2.23-2.09 4.16-4.1 5.36l6.53 5.06c3.86-3.56 6.11-8.77 6.11-14.98z"/>
+        <path fill="#FBBC05" d="M9.5 34.58c-2.13-2.13-3.75-4.86-4.69-8.02l-6.85 5.37C2.62 31.18 6.05 34 12 34l7.93-6.2z"/>
+        <path fill="#34A853" d="M15.9 24.6c-.26-1.66-.26-3.37 0-5.04l-7.93-6.2c-2.77 2.6-4.62 6.3-4.62 10.3 0 3.9 1.79 7.5 4.5 9.8l6.85-5.36c.63-1.65 1.95-2.97 3.59-3.7z"/>
+      </svg>
+      Continue with Google
+    </button>
+  )
+}
+
 export default function Auth() {
   const { enterDemo } = useAuth()
   const [mode, setMode] = useState('login')
@@ -193,6 +224,14 @@ export default function Auth() {
           <Button type="submit" className="w-full mt-2" loading={loading}>
             {mode === 'login' ? 'Log In' : 'Create Account'}
           </Button>
+
+          <div className="flex items-center gap-4 my-4">
+            <div className="flex-1 h-px bg-line-subtle" />
+            <span className="text-xs text-ink-muted font-semibold">OR</span>
+            <div className="flex-1 h-px bg-line-subtle" />
+          </div>
+
+          <GoogleButton loading={loading} setLoading={setLoading} setError={setError} />
         </form>
       </motion.div>
 
