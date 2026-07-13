@@ -1,38 +1,90 @@
-# Sprout (Working Title)
+# Sprout
 
-Sprout is a productivity app where a digital pet grows healthier as you complete tasks. Earn coins, spend them in the shop, and watch your pet move through 4 moods: thriving, content, droopy, sad.
+A productivity app where a digital pet grows healthier as you complete tasks. Earn coins, spend them in the shop, and watch your pet move through 4 moods: thriving, content, droopy, sad.
 
-## Local setup
+## Quick start (Demo)
 
-1. Create a Firebase project.
-2. Enable **Authentication (Email/Password)** and **Firestore**.
-3. Copy `.env.example` to `.env` and fill in the Firebase values.
-4. Run:
+The public site works without any setup. Open: https://user74627.github.io/sprout-web-app/
+
+- Click **Start Demo** to jump in
+- Data saves in your browser's `localStorage`
+- No account required, no Firebase credentials
+
+## Local development (Production mode)
 
 ```bash
+# 1. Create a Firebase project
+# 2. Enable Authentication (Email/Password) and Cloud Firestore
+# 3. Copy .env.example to .env and fill in values
+
 npm install
 npm run dev
 ```
 
-## Demo mode (no Firebase)
-
-For showcases, run with demo data in `localStorage`:
+## Environment variables
 
 ```bash
 # .env
-VITE_DEMO_MODE=true
-npm run dev
+VITE_FIREBASE_API_KEY=your-api-key
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
+VITE_FIREBASE_APP_ID=1:123456789:web:abc123
 ```
 
-The public GitHub Pages build uses demo mode by default (`VITE_DEMO_MODE=true` in the deploy workflow). Open the site and tap **Start Demo** (or you land in the app automatically).
+## Mobile app (Expo)
 
-## Deploy
+```bash
+cd apps/mobile
+npm install
+npx expo start
+```
 
-Live site: https://user74627.github.io/sprout-web-app/
+- Uses NativoWind for styling (Tailwind-like)
+- Demo mode stores data in AsyncStorage
+- Shared core logic from `src/core`
 
-This repo deploys to GitHub Pages via `.github/workflows/deploy.yml` on every push to `main`.
+## Firebase backend setup
 
-To use real Firebase on Pages, set `VITE_DEMO_MODE=false` in the workflow and add these **Repository secrets** (Settings → Secrets and variables → Actions), matching `.env.example`:
+The backend requires these Firebase products enabled:
+
+- Authentication (Email/Password)
+- Cloud Firestore (in `src/core` folder, rules in `firebase/firestore.rules`)
+- Cloud Functions (for reward-safe task completion and purchases)
+
+### Deploy Functions
+
+```bash
+cd functions
+npm install
+firebase deploy --only functions
+```
+
+### Deploy Firestore rules
+
+```bash
+firebase deploy --only firestore:rules
+fb deploy --only firestore:indexes
+```
+
+## Project structure
+
+```
+sprout-web-app/
+src/
+  core/              # Shared game logic (rewards, pet state, tasks)
+  hooks/             # React hooks (useAuth, usePet, useTasks, useShop)
+  pages/             # Screens (Home, Tasks, Shop, Settings)
+  components/        # UI kit, Pet, Navbar
+functions/           # Cloud Functions (completeTask, purchaseItem, applyPetDecay)
+firebase/            # Firestore rules, indexes, shop seeds
+apps/mobile/         # Expo React Native app
+```
+
+## Secrets for production Pages deploy
+
+In GitHub → Settings → Secrets and variables → Actions, add:
 
 - `VITE_FIREBASE_API_KEY`
 - `VITE_FIREBASE_AUTH_DOMAIN`
@@ -41,5 +93,6 @@ To use real Firebase on Pages, set `VITE_DEMO_MODE=false` in the workflow and ad
 - `VITE_FIREBASE_MESSAGING_SENDER_ID`
 - `VITE_FIREBASE_APP_ID`
 
-In Firebase Console, add `user74627.github.io` to **Authorized domains** (Authentication → Settings).
+## License
 
+MIT

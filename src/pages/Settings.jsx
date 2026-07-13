@@ -56,7 +56,7 @@ function WeeklyActivity({ tasksCompleted = 0 }) {
   )
 }
 
-export default function Profile() {
+export default function Settings() {
   const { user, leaveDemo } = useAuth()
   const { petData, loading, updatePetName } = usePet()
   const [editingName, setEditingName] = useState(false)
@@ -112,12 +112,10 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="page">
-        <div className="skeleton h-8 w-40 mb-6" />
+        <div className="skeleton h-8 w-44 mb-6" />
         <div className="skeleton h-24 w-full mb-4" />
         <div className="skeleton h-32 w-full mb-4" />
         <div className="grid grid-cols-2 gap-3">
-          <div className="skeleton h-24" />
-          <div className="skeleton h-24" />
           <div className="skeleton h-24" />
           <div className="skeleton h-24" />
         </div>
@@ -128,70 +126,76 @@ export default function Profile() {
   return (
     <div className="page">
       <PageHeader
-        title="Progress"
-        subtitle={memberSince ? `Member since ${memberSince}` : 'Your journey with Pip'}
+        title="Settings"
+        subtitle={memberSince ? `Member since ${memberSince}` : 'Your account'}
       />
 
-      {/* User card */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="card flex items-center gap-4 mb-4"
+        className="card mb-4"
       >
-        <div className="w-14 h-14 rounded-2xl bg-sprout-100 flex items-center justify-center
-                        text-2xl font-bold text-sprout-700 flex-shrink-0">
-          {(user?.displayName ?? 'U')[0].toUpperCase()}
+        <h3 className="text-card-heading mb-3">Account</h3>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 rounded-2xl bg-sprout-100 flex items-center justify-center font-bold text-sprout-700">
+            {(user?.displayName ?? 'U')[0].toUpperCase()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-heading truncate">{user?.displayName ?? 'Sprout User'}</p>
+            <p className="text-caption text-ink-muted truncate">{user?.email}</p>
+          </div>
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-card-heading truncate">{user?.displayName ?? 'Sprout User'}</p>
-          <p className="text-caption text-ink-muted truncate">{user?.email}</p>
-        </div>
+
+        <Button variant="secondary" className="w-full" onClick={handleSignOut} loading={signingOut}>
+          Sign out
+        </Button>
       </motion.div>
 
-      {/* Pet card */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.05 }}
-        className="card flex items-center gap-4 mb-4"
+        className="card mb-4"
       >
-        <Pet health={health} equippedItems={equipped} size={70} />
-        <div className="flex-1">
-          {editingName ? (
-            <div className="flex items-center gap-2">
-              <input
-                value={petNameInput}
-                onChange={(e) => setPetNameInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && savePetName()}
-                autoFocus
-                maxLength={20}
-                className="input flex-1 py-1.5 text-label font-bold"
-              />
-              <Button size="sm" variant="ghost" onClick={savePetName}>Save</Button>
-              <button type="button" onClick={() => setEditingName(false)} className="text-ink-muted text-sm">×</button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <p className="text-title text-lg">{petName}</p>
-              <button
-                type="button"
-                onClick={startEditName}
-                className="text-caption text-ink-muted hover:text-ink-secondary"
-                aria-label="Rename pet"
-              >
-                Edit
-              </button>
-            </div>
-          )}
-          <span className={`badge mt-1 ${stateInfo.bg} ${stateInfo.color}`}>
-            {stateInfo.label}
-          </span>
+        <h3 className="text-card-heading mb-3">Pet</h3>
+        <div className="flex items-center gap-4 mb-4">
+          <Pet health={health} equippedItems={equipped} size={70} />
+          <div className="flex-1">
+            {editingName ? (
+              <div className="flex items-center gap-2">
+                <input
+                  value={petNameInput}
+                  onChange={(e) => setPetNameInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && savePetName()}
+                  autoFocus
+                  maxLength={20}
+                  className="input flex-1 py-1.5 text-label font-bold"
+                />
+                <Button size="sm" variant="ghost" onClick={savePetName}>Save</Button>
+                <button type="button" onClick={() => setEditingName(false)} className="text-ink-muted text-sm">Cancel</button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <p className="text-heading text-lg">{petName}</p>
+                <button
+                  type="button"
+                  onClick={startEditName}
+                  className="text-caption text-ink-muted hover:text-ink-secondary"
+                  aria-label="Rename pet"
+                >
+                  Edit
+                </button>
+              </div>
+            )}
+            <span className={`badge mt-1 ${stateInfo.bg} ${stateInfo.color}`}>
+              {stateInfo.label}
+            </span>
+          </div>
         </div>
       </motion.div>
 
       <WeeklyActivity tasksCompleted={tasksCompleted} />
 
-      {/* Key stats */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -203,9 +207,7 @@ export default function Profile() {
         <StatCard value={tasksCompleted} label="Tasks done" />
         <StatCard value={streak} label="Day streak" tone="streak" />
         <StatCard value={petData?.totalCoinsEarned ?? 0} label="Coins earned" tone="coin" />
-        <StatCard value={coins} label="Coins now" tone="coin" />
-        <StatCard value={`${health}/100`} label="Pet health" tone="sprout" />
-        <StatCard value={petData?.coinsSpent ?? 0} label="Coins spent" />
+        <StatCard value={coins} label="Coins holding" tone="coin" />
       </motion.div>
 
       {isDemoMode && (
@@ -213,23 +215,12 @@ export default function Profile() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.12 }}
-          className="mb-3"
         >
           <Button variant="secondary" className="w-full" onClick={handleResetDemo}>
             Reset demo data
           </Button>
         </motion.div>
       )}
-
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15 }}
-      >
-        <Button variant="danger" className="w-full" onClick={handleSignOut} loading={signingOut}>
-          Sign out
-        </Button>
-      </motion.div>
     </div>
   )
 }

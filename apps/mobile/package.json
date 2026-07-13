@@ -7,23 +7,36 @@
     "start": "expo start",
     "ios": "expo start --ios",
     "android": "expo start --android",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "build": "eas build --platform all"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "latest",
     "@react-navigation/bottom-tabs": "latest",
     "@react-navigation/native": "latest",
     "@react-navigation/native-stack": "latest",
-    "expo": "latest",
+    "expo": "~53.0.0",
     "expo-notifications": "latest",
     "firebase": "^11.0.0",
-    "react": "^18.3.1",
-    "react-native": "latest",
+    "nativewind": "latest",
+    "react": "18.3.1",
+    "react-native": "0.76.0",
     "react-native-safe-area-context": "latest",
     "react-native-screens": "latest"
   },
   "devDependencies": {
     "@babel/core": "latest"
+  },
+  "eas": {
+    "build": {
+      "production": {
+        "android": {
+          "buildType": "app-bundle"
+        },
+        "ios": {
+          "buildType": "app-store"
+        }
+      }
+    }
   }
 }
-

@@ -4,7 +4,7 @@ import Auth from './pages/Auth'
 import Home from './pages/Home'
 import TaskList from './pages/TaskList'
 import Shop from './pages/Shop'
-import Profile from './pages/Profile'
+import Settings from './pages/Settings'
 import Navbar from './components/Navbar/Navbar'
 import DemoBanner from './components/DemoBanner/DemoBanner'
 import ViewModeToggle from './components/ViewModeToggle/ViewModeToggle'
@@ -42,8 +42,8 @@ export default function App() {
           <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
           <Route path="/tasks" element={<ProtectedRoute><TaskList /></ProtectedRoute>} />
           <Route path="/shop" element={<ProtectedRoute><Shop /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+<Route path="/profile" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         {user && <Navbar />}
       </div>
