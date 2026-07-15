@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react'
+import { Monitor, Smartphone } from 'lucide-react'
 import { isDemoMode } from '../../lib/isDemoMode'
 
+function initialMode() {
+  const saved = localStorage.getItem('sprout-view-mode')
+  if (saved === 'website' || saved === 'app') return saved
+  return window.matchMedia?.('(min-width: 1024px)').matches ? 'website' : 'app'
+}
+
 export default function ViewModeToggle() {
-  const [mode, setMode] = useState(() => {
-    const saved = localStorage.getItem('sprout-view-mode')
-    return saved === 'website' ? 'website' : 'app'
-  })
+  const [mode, setMode] = useState(initialMode)
 
   useEffect(() => {
     localStorage.setItem('sprout-view-mode', mode)
@@ -18,14 +22,9 @@ export default function ViewModeToggle() {
   const label = `Switch to ${nextMode === 'app' ? 'mobile app' : 'desktop website'} view`
 
   return (
-    <button
-      type="button"
-      onClick={() => setMode(nextMode)}
-      className="fixed bottom-20 right-4 z-40 bg-white/90 backdrop-blur-sm border border-soil-200/50 rounded-full px-3 py-2 shadow-sm text-xs font-medium text-soil-600 transition-colors duration-150 hover:bg-soil-50 focus-visible:ring-2 focus-visible:ring-sprout-400"
-      title={label}
-      aria-label={label}
-    >
-      {mode === 'app' ? '📱' : '🖥️'}
+    <button type="button" onClick={() => setMode(nextMode)} className="garden-view-toggle" title={label} aria-label={label}>
+      {mode === 'app' ? <Smartphone size={17} aria-hidden="true" /> : <Monitor size={17} aria-hidden="true" />}
+      <span>{mode === 'app' ? 'App view' : 'Website view'}</span>
     </button>
   )
 }
