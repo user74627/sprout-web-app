@@ -1,7 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { Home, CheckSquare, ShoppingBag, BarChart3 } from '../ui/icons'
 import SproutMark from '../SproutMark/SproutMark'
-import ThemeToggle from '../ThemeToggle/ThemeToggle'
 
 const links = [
   { to: '/', label: 'Garden', Icon: Home },
@@ -25,7 +24,6 @@ export default function Navbar() {
       <aside className="sprout-side-nav" aria-label="Primary navigation">
         <div className="sprout-side-brand"><SproutMark size={40} /><strong>Sprout</strong></div>
         <nav>{links.map((link) => <NavigationLink key={link.to} {...link} desktop />)}</nav>
-        <div className="sprout-side-footer"><ThemeToggle /></div>
       </aside>
       <nav className="sprout-bottom-nav" aria-label="Primary navigation">
         <div>{links.map((link) => <NavigationLink key={link.to} {...link} />)}</div>

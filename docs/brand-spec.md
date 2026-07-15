@@ -12,17 +12,18 @@ Sprout is a warm, botanical habit companion. The plant pet is the primary identi
 
 ## Color roles
 
-- Forest: `#173C2B` — primary ink and deep brand surface
-- Leaf: `#5DA84A` — growth, completion, health, and primary action
-- Moss: `#3F7F3B` — depth and interactive emphasis
-- Parchment: `#F8F4E9` — canvas
-- Soil: `#6B5745` — secondary ink
-- Sun: `#E8B73E` — XP, coins, celebration
-- Coral: `#D9684C` — hard tasks and destructive emphasis
+- Stone: `#F2EFE7` — application canvas
+- Paper: `#FBFAF6` — continuous working surface
+- Charcoal: `#1E211D` — primary text
+- Secondary ink: `#666A62` — descriptions and metadata
+- Leaf: `#2F6B46` — growth, completion, and primary action only
+- Soft leaf: `#DDE8DE` — selected and completed states
+- Sun: `#C58B24` — XP, coins, and celebration only
+- Coral: `#B84D3F` — hard tasks and destructive emphasis
 
 ## Typography
 
-DM Sans is the current product typeface and remains the body and display family for this iteration. Display settings use heavier weights, tighter tracking, and larger contrast to create a more characterful hierarchy without adding another network dependency.
+Bricolage Grotesque is the display family for identity-bearing headings. DM Sans remains the body, control, and data family. Normal interface text should not fall below 12px, and reading text should remain at 15–16px.
 
 ## Shape and material
 

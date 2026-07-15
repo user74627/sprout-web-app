@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowRight, Check, Coins, Heart, Leaf, Plus, Sparkles, Star } from 'lucide-react'
+import { ArrowRight, Check, CheckCircle2, Coins, Heart, Plus, Star } from 'lucide-react'
 import { usePet, getPetState } from '../hooks/usePet'
 import { useTasks } from '../hooks/useTasks'
 import { getLevelProgress, getPetLevel, XP_PER_LEVEL } from '../core/pet'
@@ -10,7 +10,6 @@ import Habitat from '../components/Habitat/Habitat'
 import GardenStatus from '../components/GardenStatus/GardenStatus'
 import GardenProgress from '../components/GardenProgress/GardenProgress'
 import RewardBurst from '../components/RewardBurst/RewardBurst'
-import ThemeToggle from '../components/ThemeToggle/ThemeToggle'
 
 const DIFFICULTY = {
   easy: { label: 'Easy', className: 'garden-difficulty-easy' },
@@ -20,9 +19,9 @@ const DIFFICULTY = {
 
 function HomeSkeleton() {
   return (
-    <div className="garden-page">
+    <div className="garden-page editorial-page">
       <div className="garden-v0-skeleton garden-v0-skeleton-title" />
-      <div className="garden-dashboard-grid">
+      <div className="editorial-home-grid">
         <div className="garden-v0-skeleton garden-v0-skeleton-habitat" />
         <div className="garden-v0-skeleton garden-v0-skeleton-panel" />
       </div>
@@ -46,18 +45,18 @@ function GardenTaskRow({ task, onComplete }) {
   }
 
   return (
-    <motion.div layout className="garden-task-row">
+    <motion.div layout className="garden-task-row editorial-task-row">
       <button type="button" className="garden-complete-button" onClick={handleComplete} disabled={completing} aria-label={`Complete task: ${task.title}`}>
-        <Check size={17} strokeWidth={3} aria-hidden="true" />
+        <Check size={16} strokeWidth={2.6} aria-hidden="true" />
         <RewardBurst reward={reward} show={showReward} />
       </button>
       <div className="garden-task-copy">
         <strong>{task.title}</strong>
         <div className="garden-task-meta">
           <span className={`garden-difficulty ${difficulty.className}`}>{difficulty.label}</span>
-          <span><Coins size={12} />+{reward.coins}</span>
-          <span><Star size={12} />+{reward.xp}</span>
-          <span><Heart size={12} />+{reward.health}</span>
+          <span><Coins size={13} />{reward.coins}</span>
+          <span><Star size={13} />{reward.xp} XP</span>
+          <span><Heart size={13} />{reward.health} health</span>
         </div>
       </div>
     </motion.div>
@@ -68,9 +67,9 @@ function RewardToast({ reward }) {
   return (
     <AnimatePresence>
       {reward && (
-        <motion.div className="garden-reward-toast" role="status" initial={{ opacity: 0, y: 18, scale: 0.94 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.97 }} transition={{ type: 'spring', stiffness: 360, damping: 25 }}>
-          <Sparkles size={18} aria-hidden="true" />
-          <span>Garden nourished</span>
+        <motion.div className="garden-reward-toast editorial-reward-toast" role="status" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}>
+          <CheckCircle2 size={18} aria-hidden="true" />
+          <span>Task complete</span>
           <strong>+{reward.coins} coins · +{reward.xp} XP</strong>
         </motion.div>
       )}
@@ -97,84 +96,86 @@ export default function Home() {
   const incompleteTasks = todaysTasks.filter((task) => !task.completed)
   const completedToday = todaysTasks.filter((task) => task.completed).length
   const nextTask = incompleteTasks[0]
+  const remaining = incompleteTasks.length
+  const dateLabel = new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date())
 
   return (
-    <motion.main className="garden-page" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}>
-      <header className="garden-page-header">
+    <motion.main className="garden-page editorial-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.22 }}>
+      <header className="editorial-page-header">
         <div>
-          <span className="garden-eyebrow"><Leaf size={13} aria-hidden="true" /> Your living routine</span>
-          <h1>{petName}&apos;s Garden</h1>
-          <p>One small win at a time. Your companion is growing with you.</p>
+          <p>{dateLabel}</p>
+          <h1>{petName}&apos;s garden</h1>
         </div>
-        <ThemeToggle />
+        <div className="editorial-header-summary">
+          <strong>{remaining}</strong>
+          <span>{remaining === 1 ? 'task remaining' : 'tasks remaining'}</span>
+        </div>
       </header>
 
-      <div className="garden-dashboard-grid">
-        <div className="garden-hero-column">
+      <div className="editorial-home-grid">
+        <aside className="editorial-garden-column">
           <Habitat health={health} equippedItems={equippedItems} petName={petName} state={state} />
           <GardenStatus health={health} level={level} streak={streak} coins={coins} />
-        </div>
+        </aside>
 
-        <div className="garden-focus-column">
-          <section className="garden-daily-card">
-            <div className="garden-daily-topline">
-              <GardenProgress completed={completedToday} total={todaysTasks.length} />
-              <div className="garden-daily-copy">
-                <span className="garden-eyebrow">Today&apos;s rhythm</span>
-                <h2>{completedToday === todaysTasks.length && todaysTasks.length > 0 ? 'A perfect little day' : 'Keep the garden moving'}</h2>
-                <p>{completedToday} of {todaysTasks.length} tasks complete</p>
-              </div>
+        <section className="editorial-workspace" aria-label="Today">
+          <header className="editorial-today-header">
+            <div>
+              <p>Today</p>
+              <h2>{completedToday} of {todaysTasks.length} complete</h2>
             </div>
-            <div className="garden-xp-block">
-              <div><span>Level {level}</span><small>{xpProgress}/{XP_PER_LEVEL} XP</small></div>
-              <div className="garden-xp-track" aria-label={`${xpProgress} of ${XP_PER_LEVEL} experience points`}>
-                <motion.span initial={{ width: 0 }} animate={{ width: `${xpProgress}%` }} transition={{ duration: 0.8 }} />
-              </div>
+            <GardenProgress completed={completedToday} total={todaysTasks.length} size={72} />
+          </header>
+
+          <div className="editorial-xp-row">
+            <div><span>Level {level}</span><small>{xpProgress} / {XP_PER_LEVEL} XP</small></div>
+            <div className="garden-xp-track" aria-label={`${xpProgress} of ${XP_PER_LEVEL} experience points`}>
+              <motion.span initial={{ width: 0 }} animate={{ width: `${xpProgress}%` }} transition={{ duration: 0.55 }} />
             </div>
+          </div>
+
+          <section className="editorial-next-section" aria-label="Next task">
+            <div className="editorial-section-label">Next task</div>
+            {nextTask ? (
+              <div className="editorial-next-row">
+                <div>
+                  <h2>{nextTask.title}</h2>
+                  <p>{DIFFICULTY[nextTask.difficulty]?.label ?? 'Medium'} · {getTaskReward(nextTask.difficulty).coins} coins · {getTaskReward(nextTask.difficulty).xp} XP</p>
+                </div>
+                <button type="button" onClick={() => completeTask(nextTask.id, nextTask.difficulty)}><Check size={17} /> Complete</button>
+              </div>
+            ) : (
+              <div className="editorial-all-done">
+                <CheckCircle2 size={21} aria-hidden="true" />
+                <div><strong>All done for today</strong><p>Add another task when you are ready.</p></div>
+              </div>
+            )}
           </section>
 
-          {nextTask ? (
-            <section className="garden-next-task" aria-label="Next recommended task">
-              <div className="garden-next-task-heading">
-                <span><Sparkles size={15} /> Next best task</span>
-                <span className="garden-reward-pill"><Coins size={13} /> +{getTaskReward(nextTask.difficulty).coins}</span>
-              </div>
-              <h2>{nextTask.title}</h2>
-              <p>Finish this to nurture {petName} and keep your momentum alive.</p>
-              <button type="button" onClick={() => completeTask(nextTask.id, nextTask.difficulty)}><Check size={18} strokeWidth={3} /> Complete &amp; nurture</button>
-            </section>
-          ) : (
-            <section className="garden-next-task garden-next-task-done">
-              <Leaf size={24} aria-hidden="true" />
-              <div><h2>Everything is tended</h2><p>{petName} is enjoying the calm. Add another task whenever you&apos;re ready.</p></div>
-            </section>
-          )}
-
-          <section className="garden-tasks-section" aria-label="Today's tasks">
-            <div className="garden-section-header">
-              <div><span className="garden-eyebrow">Your next steps</span><h2>Today&apos;s tasks</h2></div>
+          <section className="editorial-tasks-section" aria-label="Today's tasks">
+            <div className="editorial-tasks-header">
+              <h2>Tasks</h2>
               <button type="button" onClick={() => setShowAddModal(true)}><Plus size={16} /> Add task</button>
             </div>
             {tasksLoading ? (
               <div className="garden-task-list"><div className="garden-v0-skeleton garden-v0-skeleton-row" /><div className="garden-v0-skeleton garden-v0-skeleton-row" /></div>
             ) : incompleteTasks.length > 0 ? (
-              <div className="garden-task-list">
+              <div className="garden-task-list editorial-task-list">
                 <AnimatePresence mode="popLayout">
-                  {incompleteTasks.slice(0, 5).map((task) => <GardenTaskRow key={task.id} task={task} onComplete={completeTask} />)}
+                  {incompleteTasks.slice(0, 6).map((task) => <GardenTaskRow key={task.id} task={task} onComplete={completeTask} />)}
                 </AnimatePresence>
               </div>
             ) : (
-              <div className="garden-empty-tasks">
-                <span><Leaf size={22} /></span>
-                <div><strong>All clear for today</strong><p>Add a new task to plant your next intention.</p></div>
-                <button type="button" onClick={() => setShowAddModal(true)}><ArrowRight size={17} /></button>
+              <div className="editorial-empty-row">
+                <span>No remaining tasks</span>
+                <button type="button" onClick={() => setShowAddModal(true)}>Add one <ArrowRight size={16} /></button>
               </div>
             )}
           </section>
-        </div>
+        </section>
       </div>
 
-      <button type="button" className="garden-fab" onClick={() => setShowAddModal(true)} aria-label="Add task"><Plus size={22} /></button>
+      <button type="button" className="garden-fab editorial-fab" onClick={() => setShowAddModal(true)} aria-label="Add task"><Plus size={22} /></button>
       <RewardToast reward={lastReward} />
       {showAddModal && <AddTaskModal onClose={() => setShowAddModal(false)} />}
     </motion.main>

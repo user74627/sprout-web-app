@@ -1,61 +1,35 @@
 import { motion, useReducedMotion } from 'framer-motion'
-import { Sparkles } from 'lucide-react'
 import Pet from '../Pet/Pet'
 
 const MOOD_COPY = {
-  thriving: 'Radiating good energy',
-  content: 'Growing steady and strong',
-  droopy: 'A little care would help',
-  sad: 'Ready for a small win',
+  thriving: 'Doing very well',
+  content: 'Doing well',
+  droopy: 'Needs some care',
+  sad: 'Needs a small win',
 }
 
-export default function Habitat({
-  health = 100,
-  equippedItems = [],
-  petName = 'Pip',
-  state = 'content',
-  className = '',
-}) {
+export default function Habitat({ health = 100, equippedItems = [], petName = 'Pip', state = 'content' }) {
   const reduceMotion = useReducedMotion()
 
   return (
-    <section className={`garden-habitat garden-habitat-${state} ${className}`} aria-label={`${petName}'s habitat`}>
-      <div className="garden-sky-glow" aria-hidden="true" />
-      <div className="garden-sun" aria-hidden="true"><span /></div>
-      <div className="garden-cloud garden-cloud-one" aria-hidden="true" />
-      <div className="garden-cloud garden-cloud-two" aria-hidden="true" />
-      <div className="garden-hill garden-hill-back" aria-hidden="true" />
-      <div className="garden-hill garden-hill-front" aria-hidden="true" />
-      <div className="garden-grain" aria-hidden="true" />
-
-      <div className="garden-habitat-label">
-        <span className="garden-live-dot" aria-hidden="true" />
-        Live garden
+    <figure className="editorial-habitat-figure">
+      <div className={`garden-habitat editorial-habitat garden-habitat-${state}`} aria-label={`${petName}'s habitat`}>
+        <div className="editorial-habitat-sun" aria-hidden="true" />
+        <div className="editorial-habitat-horizon" aria-hidden="true" />
+        <div className="editorial-habitat-ground" aria-hidden="true" />
+        <div className="garden-pet-stage editorial-pet-stage">
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reduceMotion ? 0 : 0.35 }}>
+            <Pet health={health} equippedItems={equippedItems} size={148} />
+          </motion.div>
+        </div>
       </div>
-
-      <motion.div
-        className="garden-pet-stage"
-        initial={{ opacity: 0, y: 16, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: reduceMotion ? 0 : 0.55, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <div className="garden-pet-aura" aria-hidden="true" />
-        <Pet health={health} equippedItems={equippedItems} size={150} />
-      </motion.div>
-
-      <div className="garden-habitat-copy">
-        <div className="garden-pet-name-row">
+      <figcaption className="editorial-habitat-caption">
+        <div>
           <h2>{petName}</h2>
-          <span className={`garden-mood-chip garden-mood-${state}`}>{state}</span>
+          <p>{MOOD_COPY[state]} · {health}% health</p>
         </div>
-        <p>{MOOD_COPY[state]}</p>
-      </div>
-
-      {state === 'thriving' && (
-        <div className="garden-sparkle" aria-hidden="true">
-          <Sparkles size={18} />
-        </div>
-      )}
-    </section>
+        <span className={`editorial-mood editorial-mood-${state}`}>{state}</span>
+      </figcaption>
+    </figure>
   )
 }
